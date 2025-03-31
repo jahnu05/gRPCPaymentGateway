@@ -1,0 +1,131 @@
+syntax = "proto3";
+
+package payment;
+
+option go_package = "github.com/jahnu05/Assignment-2/P-3";
+
+// Service for Payment Gateway
+service PaymentGateway {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc ProcessPayment(TransactionRequest) returns (TransactionResponse);
+  rpc GetBalance(BalanceRequest) returns (BalanceResponse);
+  rpc GetTransactionHistory(HistoryRequest) returns (HistoryResponse);
+  rpc Unregister(UnregisterRequest) returns (UnregisterResponse);
+
+}
+
+// Service for Bank Servers
+service BankService {
+  rpc PreparePayment(PrepareRequest) returns (PrepareResponse);
+  rpc CommitPayment(CommitRequest) returns (CommitResponse);
+  rpc AbortPayment(AbortRequest) returns (AbortResponse);
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse);
+}
+
+// Registration messages
+message RegisterRequest {
+  string username = 1;
+  string password = 2;
+  string bankName = 3;
+}
+
+message RegisterResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Transaction messages
+message TransactionRequest {
+  string transactionId = 1;
+  string senderUsername = 2;
+  string receiverUsername = 3;
+  double amount = 4;
+  string senderBank = 5;    
+  string receiverBank = 6;  
+  string IdempotencyKey = 7;
+}
+
+message TransactionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Two-phase commit messages
+message PrepareRequest {
+  string transactionId = 1;
+  string account = 2;
+  double amount = 3;
+}
+
+message PrepareResponse {
+  bool vote = 1; // true = commit, false = abort
+  string message = 2;
+}
+
+message CommitRequest {
+  string transactionId = 1;
+  string account = 2;
+  double amount = 3;
+  bool isSender = 4;
+}
+
+message CommitResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message AbortRequest {
+  string transactionId = 1;
+}
+
+message AbortResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Balance messages for PaymentGateway
+message BalanceRequest {
+  string username = 1;
+}
+
+message BalanceResponse {
+  double balance = 1;
+}
+
+// Bank's GetBalance messages (can be reused)
+message GetBalanceRequest {
+  string username = 1;
+}
+
+message GetBalanceResponse {
+  double balance = 1;
+}
+
+// History messages for transaction history.
+message HistoryRequest {
+  string username = 1;
+}
+
+message TransactionRecord {
+  string transactionId = 1;
+  string sender = 2;
+  string receiver = 3;
+  double amount = 4;
+  string timestamp = 5;
+  string message = 6;
+}
+
+message HistoryResponse {
+  repeated TransactionRecord records = 1;
+}
+
+
+// New messages for unregistering a user
+message UnregisterRequest {
+  string username = 1;
+}
+
+message UnregisterResponse {
+  bool success = 1;
+  string message = 2;
+}
